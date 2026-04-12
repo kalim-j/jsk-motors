@@ -351,7 +351,7 @@ const DEFAULT_FORM = {
   specialization: "",
   carTypes: "",
   rating: 4.5,
-  status: "active" as const,
+  status: "active" as "active" | "inactive",
   notes: "",
 };
 
