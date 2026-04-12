@@ -8,8 +8,6 @@ import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc, orderBy, query 
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { toast } from "react-hot-toast";
 import { ReactCompareSlider, ReactCompareSliderImage } from "react-compare-slider";
-import Link from "next/link";
-import { format } from "date-fns";
 
 interface RepairEntry {
   id?: string;
@@ -19,7 +17,7 @@ interface RepairEntry {
   cost: string;
   beforeImages: string[];
   afterImages: string[];
-  createdAt: any;
+  createdAt: Date | string;
 }
 
 export default function RepairShowcaseAdmin() {

@@ -72,7 +72,7 @@ export default function Footer() {
               </div>
             </div>
             <p className="text-charcoal-400 text-sm leading-relaxed mb-6">
-              JSK CAR BODY SHOP — India's trusted partner for accident car
+              JSK CAR BODY SHOP — India&apos;s trusted partner for accident car
               restoration, professional painting, and premium resale services.
             </p>
             {/* Social */}

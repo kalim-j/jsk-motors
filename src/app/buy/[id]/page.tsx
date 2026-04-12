@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, Fuel, Gauge, Settings, MapPin, Calendar, Shield, Phone, MessageCircle, ChevronLeft, ChevronRight } from "lucide-react";
@@ -101,11 +101,11 @@ export default function CarDetailPage({ params }: { params: { id: string } }) {
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
                 {[
-                  { label: "Brand", value: car.brand, Icon: null },
-                  { label: "Model", value: car.model, Icon: null },
-                  { label: "Year", value: car.year, Icon: Calendar },
-                  { label: "Condition", value: car.condition, Icon: Shield },
-                ].map(({ label, value, Icon }) => (
+                  { label: "Brand", value: car.brand },
+                  { label: "Model", value: car.model },
+                  { label: "Year", value: car.year },
+                  { label: "Condition", value: car.condition },
+                ].map(({ label, value }) => (
                   <div key={label} className="glass rounded-xl p-3 text-center border border-white/5">
                     <div className="text-charcoal-400 text-xs mb-1">{label}</div>
                     <div className="text-white font-semibold text-sm">{String(value)}</div>

@@ -11,7 +11,6 @@ import {
   Upload,
   X,
   Camera,
-  ArrowLeft,
   CheckCircle,
   Info,
 } from "lucide-react";
