@@ -46,64 +46,77 @@ export default function AdminSubmissionsPage() {
 
   const handleStatusUpdate = async (id: string, status: CarSubmission["status"], note?: string, price?: number) => {
     try {
-      // Find the specific submission data
-      const sub = submissions.find(s => s.id === id);
-      if (!sub) return;
+      console.log("APPROVE ACTION TRIGGERED:", { id, status });
 
-      let finalStatus = status;
-      
-      // Damage-based workflow logic
-      if (status === "approved" && sub.damageLevel === "Severe") {
-        finalStatus = "under_review";
-        toast.loading("Severe damage detected: Moving to under_review for extra checks", { duration: 3000 });
+      const sub = submissions.find(s => s.id === id);
+      if (!sub) {
+        console.error("COULD NOT FIND SUBMISSION IN STATE:", id);
+        return;
       }
 
-      const updateData: Record<string, unknown> = {
+      console.log("SUBMISSION DATA FOUND:", sub);
+
+      let finalStatus = status;
+      const subDamage = (sub.damageLevel || "Minor").toLowerCase();
+      
+      if (status === "approved" && subDamage === "severe") {
+        finalStatus = "under_review";
+        console.log("SEVERE DAMAGE DETECTED - FORCING UNDER_REVIEW");
+        toast.loading("Severe damage detected: Moving to under_review", { duration: 3000 });
+      }
+
+      const updateData: Record<string, any> = {
         status: finalStatus,
         updatedAt: new Date()
       };
       if (note) updateData.adminNotes = note;
       if (price) updateData.offeredPrice = price;
 
+      console.log("UPDATING SUBMISSION STATUS IN FIRESTORE...");
       await updateDoc(doc(db, "car_submissions", id), updateData);
+      console.log("SUBMISSION STATUS UPDATED ✅");
 
-      // Inventory workflow: Move to Buy Cars if approved and damage is manageable
-      const isManageable = sub.damageLevel.toLowerCase() !== "severe" && sub.damageLevel.toLowerCase() !== "total loss";
+      const isManageable = subDamage !== "severe" && subDamage !== "total loss";
       
       if (finalStatus === "approved" && isManageable) {
+        console.log("PREPARING TO ADD TO CARS COLLECTION...");
+        
         await addDoc(collection(db, "cars"), {
-          title: `${sub.carYear} ${sub.carBrand} ${sub.carModel}`,
-          brand: sub.carBrand,
-          model: sub.carModel,
-          year: sub.carYear,
-          price: price || sub.expectedPrice,
-          originalPrice: sub.expectedPrice,
-          images: sub.images,
-          city: sub.city,
-          state: sub.state,
-          fuelType: "Petrol", // Default
-          transmission: "Manual", // Default
+          title: `${sub.carYear || ""} ${sub.carBrand || ""} ${sub.carModel || ""}`.trim() || "Managed Listing",
+          brand: sub.carBrand || "Unknown",
+          model: sub.carModel || "Unknown",
+          year: sub.carYear || new Date().getFullYear(),
+          price: price || sub.expectedPrice || 0,
+          originalPrice: sub.expectedPrice || 0,
+          images: sub.images || [],
+          city: sub.city || "Unknown",
+          state: sub.state || "",
+          fuelType: "Petrol",
+          transmission: "Manual",
           mileage: 0, 
           condition: sub.damageLevel === "Minor" ? "Good" : "Fair",
           status: "available",
           featured: false,
-          description: sub.damageDescription,
+          description: sub.damageDescription || "No description provided.",
           source: "user_submission",
           submissionId: id,
           createdAt: new Date(),
           updatedAt: new Date()
         });
+        
+        console.log("SUCCESSFULLY ADDED TO CARS COLLECTION! 🚀");
         toast.success("Car approved and moved to active Inventory! ✅");
       } else if (finalStatus === "approved") {
-        toast.success("Car approved, but too damaged for direct inventory. Manual listing required.");
+        console.log("CAR APPROVED BUT TOO DAMAGED FOR DIRECT LISTING (SEVERE/TOTAL LOSS)");
+        toast.success("Car approved, but too damaged for direct inventory.");
       } else {
         toast.success(`Submission status updated to ${finalStatus}`);
       }
 
       setSelected(null);
     } catch (error) {
-      console.error("Error updating status:", error);
-      toast.error("Failed to update status");
+      console.error("🔴 CRITICAL ERROR IN APPROVAL FLOW:", error);
+      toast.error("Failed to update status. Check console for details.");
     }
   };
 
