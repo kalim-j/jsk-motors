@@ -57,18 +57,21 @@ export default function ProfilePage() {
       
       try {
         // Fetch User Info
+        console.log("DEBUG: FETCHING PROFILE FOR UID:", user.uid);
         const userDoc = await getDoc(doc(db, "users", user.uid));
         if (userDoc.exists()) {
           setUserData(userDoc.data() as UserData);
         }
 
         // Fetch User Cars
+        console.log("DEBUG: QUERYING SUBMISSIONS FOR UID:", user.uid);
         const q = query(
           collection(db, "car_submissions"),
           where("userId", "==", user.uid),
           orderBy("createdAt", "desc")
         );
         const snapshot = await getDocs(q);
+        console.log("DEBUG: SUBMISSIONS FOUND:", snapshot.docs.length);
         const cars = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()

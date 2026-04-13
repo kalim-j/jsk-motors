@@ -70,7 +70,11 @@ export default function PublicCarDetailPage({ params }: { params: Promise<{ id: 
     );
   }
 
-  const images = car.images?.length ? car.images : ["https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?w=800"];
+  const images = Array.isArray(car.images) && car.images.length > 0 
+    ? car.images 
+    : typeof car.images === "string" && car.images 
+      ? [car.images] 
+      : ["https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?w=800"];
 
   return (
     <div className="min-h-screen bg-black pt-28 pb-20">

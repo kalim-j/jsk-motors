@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "lh3.googleusercontent.com" },
       { protocol: "https", hostname: "images.unsplash.com" },
       { protocol: "https", hostname: "*.googleusercontent.com" },
+      { protocol: "https", hostname: "res.cloudinary.com" },
     ],
     // Auto image format: WebP / AVIF for smaller sizes
     formats: ["image/avif", "image/webp"],
