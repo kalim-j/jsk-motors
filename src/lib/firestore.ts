@@ -91,6 +91,30 @@ export interface CarSubmission {
   updatedAt?: Timestamp;
 }
 
+export interface RepairEntry {
+  id?: string;
+  carName: string;
+  description: string;
+  date: string;
+  cost: string;
+  beforeImages: string[];
+  afterImages: string[];
+  createdAt?: Timestamp;
+  updatedAt?: Timestamp;
+}
+
+export interface RepairEntry {
+  id?: string;
+  carName: string;
+  description: string;
+  date: string;
+  cost: string;
+  beforeImages: string[];
+  afterImages: string[];
+  createdAt?: Timestamp;
+  updatedAt?: Timestamp;
+}
+
 // ─── Cars ─────────────────────────────────────────────────────────────────────
 
 export const getCars = async (filters?: {
@@ -321,10 +345,37 @@ export const subscribeToSubmissions = (
     orderBy("createdAt", "desc"),
     limit(50)
   );
-  return onSnapshot(q, (snapshot) => {
-    const submissions = snapshot.docs.map(
-      (doc) => ({ id: doc.id, ...doc.data() } as CarSubmission)
-    );
-    callback(submissions);
   });
+};
+
+// ─── Repairs / Showcase ───────────────────────────────────────────────────────
+
+export const getRepairs = async (): Promise<RepairEntry[]> => {
+  const q = query(collection(db, "repairs"), orderBy("createdAt", "desc"));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(
+    (doc) => ({ id: doc.id, ...doc.data() } as RepairEntry)
+  );
+};
+
+export const subscribeToRepairs = (
+  callback: (repairs: RepairEntry[]) => void
+): Unsubscribe => {
+  const q = query(collection(db, "repairs"), orderBy("createdAt", "desc"));
+  return onSnapshot(q, (snapshot) => {
+    callback(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as RepairEntry)));
+  });
+};
+
+export const addRepair = async (repair: Omit<RepairEntry, "id">): Promise<string> => {
+  const docRef = await addDoc(collection(db, "repairs"), {
+    ...repair,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+  return docRef.id;
+};
+
+export const deleteRepair = async (id: string): Promise<void> => {
+  await deleteDoc(doc(db, "repairs", id));
 };

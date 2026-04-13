@@ -1,44 +1,27 @@
-"use client";
-
-import { useState } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { ReactCompareSlider, ReactCompareSliderImage } from "react-compare-slider";
-
-const beforeAfterItems = [
-  {
-    id: 1,
-    title: "Hyundai Creta Front End Restoration",
-    description: "Severe front collision damage restored to factory condition",
-    before: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600",
-    after: "https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?w=600",
-    duration: "12 days",
-    category: "Full Restoration",
-  },
-  {
-    id: 2,
-    title: "Maruti Swift Full Repaint",
-    description: "Complete color change with premium metallic paint finish",
-    before: "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?w=600",
-    after: "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=600",
-    duration: "5 days",
-    category: "Paint Job",
-  },
-  {
-    id: 3,
-    title: "Honda City Body Repair",
-    description: "Side impact damage with complete panel replacement",
-    before: "https://images.unsplash.com/photo-1507136566006-cfc505b114fc?w=600",
-    after: "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?w=600",
-    duration: "8 days",
-    category: "Body Repair",
-  },
-];
+import { subscribeToRepairs, RepairEntry } from "@/lib/firestore";
 
 export default function BeforeAfterSection() {
+  const [repairs, setRepairs] = useState<RepairEntry[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 });
-  const active = beforeAfterItems[activeIndex];
+
+  useEffect(() => {
+    // Listen to real-time additions from admin
+    const unsubscribe = subscribeToRepairs((data) => {
+      setRepairs(data);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  if (loading || repairs.length === 0) return null;
+
+  const active = repairs[activeIndex];
 
   return (
     <section className="section-padding bg-black relative overflow-hidden">
@@ -68,7 +51,7 @@ export default function BeforeAfterSection() {
 
         {/* Tabs */}
         <div className="flex flex-wrap justify-center gap-3 mb-10">
-          {beforeAfterItems.map((item, idx) => (
+          {repairs.map((item, idx) => (
             <button
               key={item.id}
               onClick={() => setActiveIndex(idx)}
@@ -78,7 +61,7 @@ export default function BeforeAfterSection() {
                   : "glass text-charcoal-300 hover:text-white border border-white/10 hover:border-gold-500/30"
               }`}
             >
-              {item.category}
+              {item.carName}
             </button>
           ))}
         </div>
@@ -96,14 +79,14 @@ export default function BeforeAfterSection() {
               <ReactCompareSlider
                 itemOne={
                   <ReactCompareSliderImage
-                    src={active.before}
+                    src={active.beforeImages[0] || ""}
                     alt="Before restoration"
                     style={{ objectFit: "cover" }}
                   />
                 }
                 itemTwo={
                   <ReactCompareSliderImage
-                    src={active.after}
+                    src={active.afterImages[0] || ""}
                     alt="After restoration"
                     style={{ objectFit: "cover" }}
                   />
@@ -123,10 +106,10 @@ export default function BeforeAfterSection() {
           {/* Info Card */}
           <div className="glass-dark rounded-2xl p-8 border border-gold-500/15">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-gold-500/30 text-gold-400 text-xs font-medium mb-6">
-              {active.category}
+              Full Restoration
             </div>
             <h3 className="font-display text-2xl font-bold text-white mb-4">
-              {active.title}
+              {active.carName}
             </h3>
             <p className="text-charcoal-400 text-sm leading-relaxed mb-6">
               {active.description}
@@ -134,16 +117,16 @@ export default function BeforeAfterSection() {
 
             <div className="space-y-3 mb-8">
               <div className="flex items-center justify-between py-3 border-b border-white/5">
-                <span className="text-charcoal-400 text-sm">Completion Time</span>
-                <span className="text-gold-400 font-semibold">{active.duration}</span>
+                <span className="text-charcoal-400 text-sm">Completion Date</span>
+                <span className="text-gold-400 font-semibold">{active.date}</span>
               </div>
               <div className="flex items-center justify-between py-3 border-b border-white/5">
                 <span className="text-charcoal-400 text-sm">Work Type</span>
-                <span className="text-white font-medium">{active.category}</span>
+                <span className="text-white font-medium">Body & Paint</span>
               </div>
               <div className="flex items-center justify-between py-3">
-                <span className="text-charcoal-400 text-sm">Quality Grade</span>
-                <span className="text-green-400 font-medium">Premium</span>
+                <span className="text-charcoal-400 text-sm">Cost Estimate</span>
+                <span className="text-green-400 font-medium">{active.cost ? `₹${active.cost}` : "Custom Quote"}</span>
               </div>
             </div>
 
@@ -151,7 +134,7 @@ export default function BeforeAfterSection() {
               href="tel:7010587940"
               className="btn-gold w-full py-3 rounded-full text-sm font-bold text-center block"
             >
-              Book Same Service
+              Book Similar Service
             </a>
           </div>
         </motion.div>

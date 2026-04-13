@@ -54,6 +54,14 @@ service cloud.firestore {
       allow write: if true; // TEMP FOR TESTING
     }
 
+    // ── Repairs / Showcase Collection ────────────────────────────────────
+    match /repairs/{docId} {
+      // Anyone can read (homepage Before & After section)
+      allow read: if true;
+      // Only admins can create/edit/delete showcases
+      allow write: if isAdmin();
+    }
+
     // ── Users Collection (optional) ─────────────────────────────────────
     match /users/{userId} {
       // Users can read/write their own data
