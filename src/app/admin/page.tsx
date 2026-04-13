@@ -17,6 +17,8 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { sampleCars, sampleDealers } from "@/lib/sampleData";
+import { db } from "@/lib/firebase";
+import { collection, onSnapshot, query, where } from "firebase/firestore";
 
 const adminNavLinks = [
   { href: "/admin", label: "Dashboard", icon: TrendingUp },
@@ -38,15 +40,26 @@ export default function AdminDashboard() {
   });
 
   useEffect(() => {
-    // Load stats from sample data
-    setStats({
+    // Load stats from sample data for cars and dealers
+    setStats(prev => ({
+      ...prev,
       totalCars: sampleCars.length,
       availableCars: sampleCars.filter((c) => (c.status as string) === "available").length,
       soldCars: sampleCars.filter((c) => (c.status as string) === "sold").length,
-      pendingSubmissions: 3,
       totalDealers: sampleDealers.length,
       activeDealers: sampleDealers.filter((d) => d.status === "active").length,
+    }));
+
+    // Fetch real pending submissions from Firestore
+    const q = query(collection(db, "car_submissions"), where("status", "in", ["pending", "under_review"]));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      setStats(prev => ({
+        ...prev,
+        pendingSubmissions: snapshot.docs.length
+      }));
     });
+
+    return () => unsubscribe();
   }, []);
 
   const statCards = [
