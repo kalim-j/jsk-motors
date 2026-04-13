@@ -3,12 +3,12 @@
 import { useState, useEffect, use } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Upload, X, Check, Save, Loader2 } from "lucide-react";
+import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { INDIAN_STATES, CAR_BRANDS, formatPrice } from "@/lib/utils";
+import { CAR_BRANDS, formatPrice } from "@/lib/utils";
 import toast from "react-hot-toast";
 
 export default function EditCarPage({ params }: { params: Promise<{ id: string }> }) {
@@ -25,15 +25,15 @@ export default function EditCarPage({ params }: { params: Promise<{ id: string }
     year: new Date().getFullYear(),
     price: "",
     originalPrice: "",
-    condition: "Good" as any,
+    condition: "Good" as CarType["condition"],
     mileage: "",
-    fuelType: "Petrol" as any,
-    transmission: "Manual" as any,
+    fuelType: "Petrol" as CarType["fuelType"],
+    transmission: "Manual" as CarType["transmission"],
     city: "",
     state: "Tamil Nadu",
     description: "",
     featured: false,
-    status: "available" as any,
+    status: "available" as CarType["status"],
     damageType: "",
     restorationStatus: "",
     images: [] as string[],
@@ -125,7 +125,7 @@ export default function EditCarPage({ params }: { params: Promise<{ id: string }
     }
   };
 
-  const update = (field: string, value: any) =>
+  const update = (field: keyof typeof formData, value: string | number | boolean) =>
     setFormData((prev) => ({ ...prev, [field]: value }));
 
   if (loading) {

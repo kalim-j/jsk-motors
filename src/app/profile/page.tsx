@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 import { db } from "@/lib/firebase";
-import { doc, getDoc, collection, query, where, getDocs, orderBy } from "firebase/firestore";
+import { doc, getDoc, collection, query, where, getDocs, orderBy, Timestamp } from "firebase/firestore";
 import { 
   User as UserIcon, 
   Mail, 
@@ -22,7 +23,6 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { formatPrice, formatDate } from "@/lib/utils";
-import toast from "react-hot-toast";
 
 interface UserData {
   name: string;
@@ -30,7 +30,7 @@ interface UserData {
   phone: string;
   dob: string;
   photoURL: string;
-  createdAt: any;
+  createdAt: Timestamp | Date | any; // Keep any as last resort or use explicit union
 }
 
 interface SubmittedCar {
@@ -40,12 +40,13 @@ interface SubmittedCar {
   carYear: number;
   expectedPrice: number;
   status: "pending" | "approved" | "rejected" | "under_review";
-  createdAt: any;
+  createdAt: Timestamp | Date | any;
   images: string[];
 }
 
 export default function ProfilePage() {
   const { user, logout, isAdmin } = useAuth();
+  const router = useRouter();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [userCars, setUserCars] = useState<SubmittedCar[]>([]);
   const [loading, setLoading] = useState(true);

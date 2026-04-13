@@ -12,7 +12,6 @@ import {
   Car,
   Eye,
 } from "lucide-react";
-import { sampleCars } from "@/lib/sampleData";
 import { formatPrice } from "@/lib/utils";
 import type { Car as CarType } from "@/lib/firestore";
 import toast from "react-hot-toast";
