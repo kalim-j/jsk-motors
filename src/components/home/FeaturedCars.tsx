@@ -70,7 +70,7 @@ export default function FeaturedCars() {
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
           >
             {cars.map((car) => (
-              <CarCard key={car.id || car.title} car={car} />
+              <CarCard key={car.id || car.name} car={car} />
             ))}
           </motion.div>
         )}
@@ -124,7 +124,7 @@ function CarCard({ car }: { car: Car }) {
         {!imgError ? (
           <Image
             src={car.images?.[0] || "https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?w=600"}
-            alt={car.title}
+            alt={car.name}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-700"
             onError={() => setImgError(true)}
@@ -168,7 +168,7 @@ function CarCard({ car }: { car: Car }) {
       {/* Content */}
       <div className="p-5">
         <h3 className="text-white font-bold text-base mb-1 group-hover:text-gold-400 transition-colors truncate">
-          {car.title}
+          {car.name}
         </h3>
         <div className="flex items-center gap-1 text-charcoal-400 text-xs mb-4">
           <MapPin size={10} />
@@ -179,7 +179,7 @@ function CarCard({ car }: { car: Car }) {
         <div className="flex flex-wrap gap-3 mb-4">
           <div className="flex items-center gap-1.5 text-charcoal-300 text-xs">
             <Fuel size={12} className="text-gold-500" />
-            {car.fuelType}
+            {car.fuel}
           </div>
           <div className="flex items-center gap-1.5 text-charcoal-300 text-xs">
             <Gauge size={12} className="text-gold-500" />
@@ -203,7 +203,7 @@ function CarCard({ car }: { car: Car }) {
         )}
 
         <Link
-          href={`/buy/${car.id || "1"}`}
+          href={`/cars/${car.id || "1"}`}
           className="btn-outline-gold w-full py-2.5 rounded-full text-sm font-semibold text-center block group-hover:bg-gold-500 group-hover:text-black transition-all duration-300"
         >
           View Details
