@@ -93,25 +93,40 @@ export default function SellPage() {
 
     setSubmitting(true);
     try {
-      const uploadedUrls: string[] = [];
+      console.log("Form submit triggered. Submitting started...");
 
-      // Upload images locally selected
-      if (images.length > 0) {
-        for (const image of images) {
-          const imageRef = ref(storage, `cars/${Date.now()}-${image.name}`);
-          const snapshot = await uploadBytes(imageRef, image);
-          const url = await getDownloadURL(snapshot.ref);
-          uploadedUrls.push(url);
+      const uploadImages = async (imageFiles: File[]) => {
+        const urls: string[] = [];
+        for (const image of imageFiles) {
+          try {
+            console.log("Uploading image:", image.name);
+            const imageRef = ref(storage, `cars/${Date.now()}-${image.name}`);
+            const snapshot = await uploadBytes(imageRef, image);
+            const url = await getDownloadURL(snapshot.ref);
+            urls.push(url);
+            console.log("Image uploaded successfully:", url);
+          } catch (error) {
+            console.error("Image upload failed:", error);
+          }
         }
+        return urls;
+      };
+
+      let uploadedUrls: string[] = [];
+
+      // Upload images safely
+      if (images.length > 0) {
+        uploadedUrls = await uploadImages(images);
       }
 
-      // Filter valid links
+      // Handle links
       const validLinks = imageLinks.filter(
         (link) => link.trim() !== "" && isValidURL(link)
       );
 
-      // Combine both
       const finalImages = [...uploadedUrls, ...validLinks];
+
+      console.log("Saving to Firestore...", { finalImages });
 
       if (finalImages.length === 0) {
         toast.error("Please provide at least 1 image file or valid link");
@@ -137,6 +152,8 @@ export default function SellPage() {
         createdAt: new Date()
       });
 
+      console.log("Saved successfully");
+
       setSuccess(true);
       reset();
       setImages([]);
@@ -144,10 +161,10 @@ export default function SellPage() {
       setImageLinks([""]);
       toast.success("Car submitted successfully ✅");
     } catch (error) {
-      console.error("Error submitting form:", error);
-      toast.error("Error submitting form ❌");
+      console.error("🔥 FULL ERROR:", error);
+      toast.error("Submission failed ❌ Check console");
     } finally {
-      setSubmitting(false); // 🔥 VERY IMPORTANT FIX
+      setSubmitting(false); // 🔥 MUST RUN
     }
   };
 
@@ -405,63 +422,9 @@ export default function SellPage() {
                 )}
               </div>
 
-              <label className="text-charcoal-300 text-sm font-medium block mb-3 mt-8">
-                Or Upload Files
+              <label className="text-charcoal-300 text-xs text-center block mt-4">
+                * Please provide at least one valid image address to submit your car.
               </label>
-              {/* Upload Zone */}
-              <label className="block w-full relative cursor-pointer mb-6">
-                <input
-                  type="file"
-                  multiple
-                  accept="image/png, image/jpeg"
-                  onChange={handleImageSelect}
-                  className="sr-only"
-                />
-                <div className="border-2 border-dashed border-white/15 hover:border-gold-500/40 rounded-2xl p-8 text-center transition-colors duration-300">
-                  <Camera size={32} className="text-charcoal-500 mx-auto mb-3" />
-                  <p className="text-white font-medium mb-1">
-                    Click to upload photos
-                  </p>
-                  <p className="text-charcoal-500 text-sm">
-                    PNG, JPG up to 10MB each • Max 6 photos
-                  </p>
-                </div>
-              </label>
-
-              {/* Preview grid */}
-              {imagePreviews.length > 0 && (
-                <div className="grid grid-cols-3 gap-3">
-                  {imagePreviews.map((url, i) => (
-                    <div key={i} className="relative group rounded-xl overflow-hidden aspect-square">
-                      <Image
-                        src={url}
-                        alt={`Car photo ${i + 1}`}
-                        fill
-                        className="object-cover"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeImage(i)}
-                        className="absolute top-2 right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <X size={12} className="text-white" />
-                      </button>
-                    </div>
-                  ))}
-                  {imagePreviews.length < 6 && (
-                    <label className="cursor-pointer aspect-square border border-dashed border-white/15 hover:border-gold-500/30 rounded-xl flex items-center justify-center transition-colors">
-                      <input
-                        type="file"
-                        multiple
-                        accept="image/png, image/jpeg"
-                        onChange={handleImageSelect}
-                        className="sr-only"
-                      />
-                      <Upload size={24} className="text-charcoal-500" />
-                    </label>
-                  )}
-                </div>
-              )}
             </div>
 
             {/* Contact Info */}
