@@ -68,6 +68,9 @@ export default function RepairShowcaseAdmin() {
     formData.append("upload_preset", process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "jsk_motors");
     
     const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "dafhtcbgo";
+    
+    console.log("DEBUG: POSTING TO CLOUDINARY...", { cloudName, file: file.name });
+    
     const res = await fetch(
       `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
       {
@@ -77,19 +80,26 @@ export default function RepairShowcaseAdmin() {
     );
 
     const data = await res.json();
-    if (data.error) throw new Error(data.error.message);
+    console.log("DEBUG: CLOUDINARY RESPONSE:", data);
+
+    if (data.error) {
+      throw new Error(`Cloudinary Error: ${data.error.message}`);
+    }
+    
+    if (!data.secure_url) {
+      throw new Error("No secure URL returned from Cloudinary ❌");
+    }
+
     return data.secure_url;
   };
 
   const uploadImages = async (files: File[]) => {
+    if (!files || files.length === 0) return [];
+    
     const urls: string[] = [];
     for (const file of files) {
-      try {
-        const url = await uploadToCloudinary(file);
-        urls.push(url);
-      } catch (err) {
-        console.error("Cloudinary individual upload failed:", err);
-      }
+      const url = await uploadToCloudinary(file);
+      urls.push(url);
     }
     return urls;
   };
@@ -99,26 +109,28 @@ export default function RepairShowcaseAdmin() {
     setUploading(true);
     
     try {
-      console.log("SUBMIT TRIGGERED - STARTING UPLOAD");
+      console.log("DEBUG: START SUBMIT", {
+        carName: formData.carName,
+        beforeFiles: beforeFiles.length,
+        afterFiles: afterFiles.length
+      });
       
       let finalBeforeUrls = [...beforeImageUrls];
       let finalAfterUrls = [...afterImageUrls];
 
       if (beforeFiles.length > 0) {
-        console.log("Uploading Before Images...", beforeFiles.length);
+        console.log("DEBUG: UPLOADING BEFORE IMAGES...");
         const newBeforeUrls = await uploadImages(beforeFiles);
         finalBeforeUrls = [...finalBeforeUrls, ...newBeforeUrls];
       }
       
       if (afterFiles.length > 0) {
-        console.log("Uploading After Images...", afterFiles.length);
+        console.log("DEBUG: UPLOADING AFTER IMAGES...");
         const newAfterUrls = await uploadImages(afterFiles);
         finalAfterUrls = [...finalAfterUrls, ...newAfterUrls];
       }
 
-      console.log("Cloudinary Uploads Complete ✅");
-      console.log("Before Images:", finalBeforeUrls);
-      console.log("After Images:", finalAfterUrls);
+      console.log("DEBUG: ALL UPLOADS COMPLETE ✅", { finalBeforeUrls, finalAfterUrls });
 
       const repairData = {
         carName: formData.carName,
@@ -131,26 +143,26 @@ export default function RepairShowcaseAdmin() {
       };
 
       if (editingId) {
-        console.log("Updating Firestore Document:", editingId);
+        console.log("DEBUG: UPDATING FIRESTORE DOC:", editingId);
         await updateDoc(doc(db, "repairs", editingId), repairData);
-        toast.success("Showcase updated successfully ✅");
+        toast.success("Showcase updated! ✅");
       } else {
-        console.log("Creating New Firestore Document");
+        console.log("DEBUG: CREATING NEW FIRESTORE DOC");
         await addDoc(collection(db, "repairs"), {
           ...repairData,
           createdAt: new Date(),
         });
-        toast.success("New showcase added successfully ✅");
+        toast.success("New showcase added! ✅");
       }
 
       closeModal();
       fetchRepairs();
-    } catch (error) {
-      console.error("🔥 CRITICAL SUBMIT ERROR:", error);
-      toast.error("Process failed ❌ Check console for details");
+    } catch (error: any) {
+      console.error("DEBUG: FULL ERROR:", error);
+      toast.error(error.message || "Process failed ❌ Check console");
     } finally {
-      setUploading(false); // ALWAYS UNSTUCK
-      console.log("SUBMISSION CYCLE COMPLETE");
+      setUploading(false);
+      console.log("DEBUG: SUBMISSION FINISHED");
     }
   };
 
