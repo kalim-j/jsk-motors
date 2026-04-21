@@ -72,10 +72,8 @@ service cloud.firestore {
     }
 
     // ── Cart Collection ─────────────────────────────────────────────────
-    match /cart/{cartId} {
-      allow read, write: if isAuthenticated() && 
-        (resource == null || resource.data.userId == request.auth.uid) &&
-        (request.resource == null || request.resource.data.userId == request.auth.uid);
+    match /cart/{userId}/items/{itemId} {
+      allow read, write: if isAuthenticated() && request.auth.uid == userId;
     }
 
     // ── Appointments (Contact form) ──────────────────────────────────────

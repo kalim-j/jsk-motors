@@ -52,7 +52,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       return;
     }
 
-    const q = query(collection(db, "cart"), where("userId", "==", user.uid));
+    const q = query(collection(db, "cart", user.uid, "items"));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const items = snapshot.docs.map((doc) => ({
         id: doc.id,
@@ -73,11 +73,11 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     const existingItem = cartItems.find((item) => item.productId === product.id);
 
     if (existingItem) {
-      await updateDoc(doc(db, "cart", existingItem.id), {
+      await updateDoc(doc(db, "cart", user.uid, "items", existingItem.id), {
         quantity: existingItem.quantity + 1,
       });
     } else {
-      await addDoc(collection(db, "cart"), {
+      await addDoc(collection(db, "cart", user.uid, "items"), {
         userId: user.uid,
         productId: product.id,
         name: product.name,
@@ -90,17 +90,19 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const removeFromCart = async (itemId: string) => {
-    await deleteDoc(doc(db, "cart", itemId));
+    if (!user) return;
+    await deleteDoc(doc(db, "cart", user.uid, "items", itemId));
     toast.success("Removed from cart");
   };
 
   const updateQuantity = async (itemId: string, quantity: number) => {
-    if (quantity < 1) return;
-    await updateDoc(doc(db, "cart", itemId), { quantity });
+    if (!user || quantity < 1) return;
+    await updateDoc(doc(db, "cart", user.uid, "items", itemId), { quantity });
   };
 
   const clearCart = async () => {
-    const promises = cartItems.map((item) => deleteDoc(doc(db, "cart", item.id)));
+    if (!user) return;
+    const promises = cartItems.map((item) => deleteDoc(doc(db, "cart", user.uid, "items", item.id)));
     await Promise.all(promises);
   };
 

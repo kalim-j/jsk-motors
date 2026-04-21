@@ -14,6 +14,7 @@ import {
   Eye,
   Database,
   Wrench,
+  ShoppingBag,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { sampleCars, sampleDealers } from "@/lib/sampleData";
@@ -22,6 +23,7 @@ import { collection, onSnapshot, query, where } from "firebase/firestore";
 
 const adminNavLinks = [
   { href: "/admin", label: "Dashboard", icon: TrendingUp },
+  { href: "/admin/products", label: "Marketplace", icon: ShoppingBag },
   { href: "/admin/cars", label: "Manage Cars", icon: Car },
   { href: "/admin/submissions", label: "Submissions", icon: ClipboardList },
   { href: "/admin/dealers", label: "Dealer Network", icon: Users },
