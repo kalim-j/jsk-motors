@@ -5,82 +5,57 @@ export async function GET(req: Request) {
   const state = searchParams.get("state") || "Tamil Nadu";
   const city = searchParams.get("city") || "";
 
-  // Use direct bbox search instead of area search - more reliable
   const searchTerm = city || state;
+  const locationQuery = encodeURIComponent(`${searchTerm}, India`);
 
-  // First get coordinates for the location using Nominatim (free)
-  const nominatimUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchTerm + ", India")}&format=json&limit=1`;
+  if (!process.env.FOURSQUARE_API_KEY) {
+    return NextResponse.json({ dealers: [], total: 0, error: "FOURSQUARE_API_KEY is missing." }, { status: 500 });
+  }
 
   try {
-    const geoRes = await fetch(nominatimUrl, {
-      headers: { "User-Agent": "JSKCarBodyShop/1.0" }
-    });
-    const geoData = await geoRes.json();
+    // Foursquare Categories:
+    // 11005: Car Dealership
+    // 11002: Auto Garage / Repair
+    // 11006: Auto Parts and Accessories
+    const categoryIds = "11005,11002,11006";
+    const fields = "fsq_id,name,location,geocodes,categories,tel,website,rating,hours,social_media,description";
+    const fsqUrl = `https://api.foursquare.com/v3/places/search?near=${locationQuery}&categories=${categoryIds}&fields=${fields}&limit=50`;
 
-    if (!geoData || geoData.length === 0) {
-      return NextResponse.json({ dealers: [], total: 0 });
+    const res = await fetch(fsqUrl, {
+      headers: {
+        Authorization: process.env.FOURSQUARE_API_KEY,
+        Accept: "application/json"
+      }
+    });
+
+    if (!res.ok) {
+      console.error("Foursquare API error:", await res.text());
+      throw new Error(`Foursquare API error: ${res.status}`);
     }
 
-    const { lat, lon, boundingbox } = geoData[0];
-    const [minLat, maxLat, minLon, maxLon] = boundingbox;
+    const data = await res.json();
 
-    // Search for car-related businesses in the bounding box
-    const overpassQuery = `
-      [out:json][timeout:30];
-      (
-        node["shop"="car"](${minLat},${minLon},${maxLat},${maxLon});
-        node["shop"="car_parts"](${minLat},${minLon},${maxLat},${maxLon});
-        node["shop"="car_repair"](${minLat},${minLon},${maxLat},${maxLon});
-        node["amenity"="car_rental"](${minLat},${minLon},${maxLat},${maxLon});
-        node["shop"="tyres"](${minLat},${minLon},${maxLat},${maxLon});
-        node["shop"="automotive"](${minLat},${minLon},${maxLat},${maxLon});
-        way["shop"="car"](${minLat},${minLon},${maxLat},${maxLon});
-        way["shop"="car_repair"](${minLat},${minLon},${maxLat},${maxLon});
-        way["shop"="car_parts"](${minLat},${minLon},${maxLat},${maxLon});
-      );
-      out body;
-      >;
-      out skel qt;
-    `;
-
-    const overpassRes = await fetch("https://overpass-api.de/api/interpreter", {
-      method: "POST",
-      body: overpassQuery,
-      headers: { "Content-Type": "text/plain" }
-    });
-
-    const overpassData = await overpassRes.json();
-
-    const dealers = overpassData.elements
-      .filter((el: any) => el.tags?.name)
-      .slice(0, 50) // limit to 50 results
-      .map((el: any) => ({
-        id: el.id.toString(),
-        name: el.tags.name,
-        phone: el.tags.phone || el.tags["contact:phone"] || el.tags["phone:mobile"] || el.tags["contact:mobile"] || el.tags["contact:whatsapp"] || null,
-        whatsapp: el.tags["contact:whatsapp"] || el.tags.phone || el.tags["contact:phone"] || null,
-        website: el.tags.website || el.tags["contact:website"] || null,
-        address: [
-          el.tags["addr:housenumber"],
-          el.tags["addr:street"],
-          el.tags["addr:suburb"]
-        ].filter(Boolean).join(", ") || null,
-        city: el.tags["addr:city"] || city || state,
-        state: el.tags["addr:state"] || state,
-        type: el.tags.shop || el.tags.amenity || "car_dealer",
-        lat: el.lat || null,
-        lon: el.lon || null,
-        openingHours: el.tags["opening_hours"] || null,
-        facebook: el.tags["contact:facebook"] || null,
-        instagram: el.tags["contact:instagram"] || null,
-        brand: el.tags.brand || null,
-        description: el.tags.description || el.tags["description:en"] || null,
-      }));
+    const dealers = data.results.map((place: any) => ({
+      id: place.fsq_id,
+      name: place.name,
+      phone: place.tel || null,
+      website: place.website || null,
+      address: place.location?.formatted_address || null,
+      city: place.location?.locality || city || state,
+      state: place.location?.region || state,
+      type: place.categories && place.categories.length > 0 ? place.categories[0].name.toLowerCase() : "car_dealer",
+      lat: place.geocodes?.main?.latitude || null,
+      lon: place.geocodes?.main?.longitude || null,
+      openingHours: place.hours?.display || null,
+      facebook: place.social_media?.facebook_id ? `https://facebook.com/${place.social_media.facebook_id}` : null,
+      instagram: place.social_media?.instagram ? `https://instagram.com/${place.social_media.instagram}` : null,
+      description: place.description || null,
+    }));
 
     return NextResponse.json({
       dealers,
       total: dealers.length,
-      location: { lat, lon, name: searchTerm }
+      location: { name: searchTerm }
     });
 
   } catch (error) {
