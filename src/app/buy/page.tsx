@@ -23,6 +23,7 @@ import { useDebouncedValue } from "@/hooks/useDebounce";
 import type { Car } from "@/lib/firestore";
 import { db } from "@/lib/firebase";
 import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
+import CustomSelect from "@/components/ui/CustomSelect";
 
 const PAGE_SIZE = 12;
 
@@ -162,20 +163,18 @@ function BuyPageContent() {
             )}
           </div>
 
-          {/* Sort */}
-          <div className="relative">
-            <select
+          <div className="relative min-w-[180px]">
+            <CustomSelect
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="input-dark pl-4 pr-10 py-3 rounded-xl text-sm appearance-none cursor-pointer min-w-[180px]"
-            >
-              <option value="newest">Newest First</option>
-              <option value="price-low">Price: Low to High</option>
-              <option value="price-high">Price: High to Low</option>
-              <option value="year-new">Year: Newest</option>
-              <option value="mileage-low">Mileage: Lowest</option>
-            </select>
-            <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-charcoal-400 pointer-events-none" />
+              onChange={setSortBy}
+              options={[
+                { value: "newest", label: "Newest First" },
+                { value: "price-low", label: "Price: Low to High" },
+                { value: "price-high", label: "Price: High to Low" },
+                { value: "year-new", label: "Year: Newest" },
+                { value: "mileage-low", label: "Mileage: Lowest" },
+              ]}
+            />
           </div>
 
           {/* Filter Toggle */}

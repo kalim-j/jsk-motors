@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import CustomSelect from "@/components/ui/CustomSelect";
 
 const MAPS_EMBED =
   "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3893.0!2d78.279!3d12.518!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTLCsDMxJzA0LjgiTiA3OMKwMTYnNDQuNCJF!5e0!3m2!1sen!2sin!4v1681234567890!5m2!1sen!2sin";
@@ -263,19 +264,19 @@ export default function ContactPage() {
                   <label className="text-charcoal-300 text-xs font-medium block mb-2">
                     Service Required
                   </label>
-                  <select
+                  <CustomSelect
                     value={formData.service}
-                    onChange={(e) => setFormData({ ...formData, service: e.target.value })}
-                    className="input-dark w-full px-4 py-3 rounded-xl text-sm"
-                  >
-                    <option>General Inquiry</option>
-                    <option>Car Restoration</option>
-                    <option>Body Painting</option>
-                    <option>Dent Removal</option>
-                    <option>Buy a Car</option>
-                    <option>Sell My Car</option>
-                    <option>Mechanical Repair</option>
-                  </select>
+                    onChange={(v) => setFormData({ ...formData, service: v })}
+                    options={[
+                      { value: "General Inquiry", label: "General Inquiry" },
+                      { value: "Car Restoration", label: "Car Restoration" },
+                      { value: "Body Painting", label: "Body Painting" },
+                      { value: "Dent Removal", label: "Dent Removal" },
+                      { value: "Buy a Car", label: "Buy a Car" },
+                      { value: "Sell My Car", label: "Sell My Car" },
+                      { value: "Mechanical Repair", label: "Mechanical Repair" },
+                    ]}
+                  />
                 </div>
                 <div>
                   <label className="text-charcoal-300 text-xs font-medium block mb-2">

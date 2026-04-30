@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Search, MapPin, Filter, X } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { useDebouncedValue } from "@/hooks/useDebounce";
+import CustomSelect from "@/components/ui/CustomSelect";
 
 interface FilterBarProps {
   onFilterChange: (filters: DealerFilters) => void;
@@ -79,46 +80,45 @@ export default function FilterBar({ onFilterChange, states }: FilterBarProps) {
         </div>
 
         <div className="w-full lg:w-auto grid grid-cols-2 md:grid-cols-4 gap-4">
-          {/* State */}
           <div>
             <label className="block text-xs font-semibold text-charcoal-400 uppercase tracking-wider mb-2">State</label>
-            <select
+            <CustomSelect
               value={filters.state}
-              onChange={(e) => handleChange("state", e.target.value)}
-              className="w-full bg-black border border-white/10 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-gold-500/50 appearance-none"
-            >
-              <option value="All">All States</option>
-              {states.map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
+              onChange={(v) => handleChange("state", v)}
+              options={[
+                { value: "All", label: "All States" },
+                ...states.map(s => ({ value: s, label: s }))
+              ]}
+            />
           </div>
 
           {/* Type */}
           <div>
             <label className="block text-xs font-semibold text-charcoal-400 uppercase tracking-wider mb-2">Type</label>
-            <select
+            <CustomSelect
               value={filters.type}
-              onChange={(e) => handleChange("type", e.target.value)}
-              className="w-full bg-black border border-white/10 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-gold-500/50 appearance-none"
-            >
-              <option value="All">All Types</option>
-              <option value="car_dealer">Car Dealers</option>
-              <option value="spare_parts">Spare Parts</option>
-              <option value="both">Both</option>
-            </select>
+              onChange={(v) => handleChange("type", v)}
+              options={[
+                { value: "All", label: "All Types" },
+                { value: "car_dealer", label: "Car Dealers" },
+                { value: "spare_parts", label: "Spare Parts" },
+                { value: "both", label: "Both" },
+              ]}
+            />
           </div>
 
           {/* Rating */}
           <div>
             <label className="block text-xs font-semibold text-charcoal-400 uppercase tracking-wider mb-2">Rating</label>
-            <select
-              value={filters.minRating}
-              onChange={(e) => handleChange("minRating", Number(e.target.value))}
-              className="w-full bg-black border border-white/10 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-gold-500/50 appearance-none"
-            >
-              <option value={0}>Any Rating</option>
-              <option value={4}>4.0+ Stars</option>
-              <option value={4.5}>4.5+ Stars</option>
-            </select>
+            <CustomSelect
+              value={String(filters.minRating)}
+              onChange={(v) => handleChange("minRating", Number(v))}
+              options={[
+                { value: "0", label: "Any Rating" },
+                { value: "4", label: "4.0+ Stars" },
+                { value: "4.5", label: "4.5+ Stars" },
+              ]}
+            />
           </div>
 
           {/* Verified Toggle */}

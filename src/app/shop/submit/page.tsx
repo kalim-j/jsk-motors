@@ -7,6 +7,7 @@ import { db } from "@/lib/firebase";
 import toast from "react-hot-toast";
 import Link from "next/link";
 import { ArrowLeft, Upload, Package } from "lucide-react";
+import CustomSelect from "@/components/ui/CustomSelect";
 
 export default function SubmitProductPage() {
   const { user } = useAuth();
@@ -89,13 +90,16 @@ export default function SubmitProductPage() {
             </div>
             <div>
               <label className="block text-sm text-gray-400 mb-2">Category *</label>
-              <select required value={form.category} onChange={e => setForm({...form, category: e.target.value})}
-                className="w-full bg-black border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-yellow-500 focus:outline-none">
-                <option value="spare">Spare Part</option>
-                <option value="accessory">Accessory</option>
-                <option value="oil">Oil & Fluids</option>
-                <option value="tyre">Tyre</option>
-              </select>
+              <CustomSelect
+                value={form.category}
+                onChange={(v) => setForm({...form, category: v})}
+                options={[
+                  { value: "spare", label: "Spare Part" },
+                  { value: "accessory", label: "Accessory" },
+                  { value: "oil", label: "Oil & Fluids" },
+                  { value: "tyre", label: "Tyre" },
+                ]}
+              />
             </div>
             <div>
               <label className="block text-sm text-gray-400 mb-2">Brand *</label>
@@ -117,12 +121,15 @@ export default function SubmitProductPage() {
             </div>
             <div>
               <label className="block text-sm text-gray-400 mb-2">Condition</label>
-              <select value={form.condition} onChange={e => setForm({...form, condition: e.target.value})}
-                className="w-full bg-black border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-yellow-500 focus:outline-none">
-                <option value="New">New</option>
-                <option value="Used">Used</option>
-                <option value="Refurbished">Refurbished</option>
-              </select>
+              <CustomSelect
+                value={form.condition}
+                onChange={(v) => setForm({...form, condition: v})}
+                options={[
+                  { value: "New", label: "New" },
+                  { value: "Used", label: "Used" },
+                  { value: "Refurbished", label: "Refurbished" },
+                ]}
+              />
             </div>
           </div>
           <div>

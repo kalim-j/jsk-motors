@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Dealer } from "@/types/dealer";
 import { X, Phone, MessageSquare } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import CustomSelect from "@/components/ui/CustomSelect";
 
 interface InquiryModalProps {
   dealer: Dealer;
@@ -115,16 +116,16 @@ export default function InquiryModal({ dealer, onClose }: InquiryModalProps) {
 
             <div>
               <label className="block text-xs font-semibold text-charcoal-400 uppercase tracking-wider mb-2">Inquiry Type</label>
-              <select
+              <CustomSelect
                 value={formData.type}
-                onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                className="w-full bg-black border border-white/10 rounded-xl py-2.5 px-4 text-sm text-white focus:border-gold-500/50 outline-none appearance-none"
-              >
-                <option value="buy">Buy a Car</option>
-                <option value="sell">Sell a Car</option>
-                <option value="spare_parts">Spare Parts</option>
-                <option value="service">Body Shop / Service</option>
-              </select>
+                onChange={(v) => setFormData({ ...formData, type: v })}
+                options={[
+                  { value: "buy", label: "Buy a Car" },
+                  { value: "sell", label: "Sell a Car" },
+                  { value: "spare_parts", label: "Spare Parts" },
+                  { value: "service", label: "Body Shop / Service" },
+                ]}
+              />
             </div>
 
             <div>

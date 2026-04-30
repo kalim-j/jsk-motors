@@ -10,6 +10,7 @@ import { addCar } from "@/lib/firestore";
 import { uploadCarImages } from "@/lib/storage";
 import { INDIAN_STATES, CAR_BRANDS, formatPrice } from "@/lib/utils";
 import toast from "react-hot-toast";
+import CustomSelect from "@/components/ui/CustomSelect";
 
 export default function AddCarPage() {
   const router = useRouter();
@@ -144,15 +145,14 @@ export default function AddCarPage() {
 
               <div>
                 <label className="text-charcoal-300 text-xs font-medium block mb-2">Brand *</label>
-                <select
+                <CustomSelect
                   value={formData.brand}
-                  onChange={(e) => update("brand", e.target.value)}
-                  className="input-dark w-full px-4 py-3 rounded-xl text-sm"
-                  required
-                >
-                  <option value="">Select Brand</option>
-                  {CAR_BRANDS.map((b) => <option key={b} value={b}>{b}</option>)}
-                </select>
+                  onChange={(v) => update("brand", v)}
+                  options={[
+                    { value: "", label: "Select Brand" },
+                    ...CAR_BRANDS.map(b => ({ value: b, label: b }))
+                  ]}
+                />
               </div>
 
               <div>
@@ -223,41 +223,29 @@ export default function AddCarPage() {
 
               <div>
                 <label className="text-charcoal-300 text-xs font-medium block mb-2">Fuel Type</label>
-                <select
+                <CustomSelect
                   value={formData.fuel}
-                  onChange={(e) => update("fuel", e.target.value)}
-                  className="input-dark w-full px-4 py-3 rounded-xl text-sm"
-                >
-                  {["Petrol", "Diesel", "Electric", "Hybrid", "CNG"].map((t) => (
-                    <option key={t} value={t}>{t}</option>
-                  ))}
-                </select>
+                  onChange={(v) => update("fuel", v)}
+                  options={["Petrol","Diesel","Electric","Hybrid","CNG"].map(t => ({ value: t, label: t }))}
+                />
               </div>
 
               <div>
                 <label className="text-charcoal-300 text-xs font-medium block mb-2">Transmission</label>
-                <select
+                <CustomSelect
                   value={formData.transmission}
-                  onChange={(e) => update("transmission", e.target.value)}
-                  className="input-dark w-full px-4 py-3 rounded-xl text-sm"
-                >
-                  {["Manual", "Automatic"].map((t) => (
-                    <option key={t} value={t}>{t}</option>
-                  ))}
-                </select>
+                  onChange={(v) => update("transmission", v)}
+                  options={["Manual","Automatic"].map(t => ({ value: t, label: t }))}
+                />
               </div>
 
               <div>
                 <label className="text-charcoal-300 text-xs font-medium block mb-2">Condition</label>
-                <select
+                <CustomSelect
                   value={formData.condition}
-                  onChange={(e) => update("condition", e.target.value)}
-                  className="input-dark w-full px-4 py-3 rounded-xl text-sm"
-                >
-                  {["Excellent", "Good", "Fair", "Restoration"].map((c) => (
-                    <option key={c} value={c}>{c}</option>
-                  ))}
-                </select>
+                  onChange={(v) => update("condition", v)}
+                  options={["Excellent","Good","Fair","Restoration"].map(c => ({ value: c, label: c }))}
+                />
               </div>
 
               <div>
@@ -272,13 +260,11 @@ export default function AddCarPage() {
 
               <div>
                 <label className="text-charcoal-300 text-xs font-medium block mb-2">State</label>
-                <select
+                <CustomSelect
                   value={formData.state}
-                  onChange={(e) => update("state", e.target.value)}
-                  className="input-dark w-full px-4 py-3 rounded-xl text-sm"
-                >
-                  {INDIAN_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
-                </select>
+                  onChange={(v) => update("state", v)}
+                  options={INDIAN_STATES.map(s => ({ value: s, label: s }))}
+                />
               </div>
 
               <div>
@@ -333,15 +319,15 @@ export default function AddCarPage() {
 
               <div>
                 <label className="text-charcoal-300 text-xs font-medium block mb-2">Status</label>
-                <select
+                <CustomSelect
                   value={formData.status}
-                  onChange={(e) => update("status", e.target.value)}
-                  className="input-dark px-4 py-2 rounded-xl text-sm"
-                >
-                  <option value="available">Available</option>
-                  <option value="reserved">Reserved</option>
-                  <option value="sold">Sold</option>
-                </select>
+                  onChange={(v) => update("status", v)}
+                  options={[
+                    { value: "available", label: "Available" },
+                    { value: "reserved", label: "Reserved" },
+                    { value: "sold", label: "Sold" },
+                  ]}
+                />
               </div>
             </div>
           </div>
