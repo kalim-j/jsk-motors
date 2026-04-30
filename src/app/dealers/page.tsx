@@ -7,6 +7,7 @@ import DealerMap from "@/components/dealers/DealerMap";
 import AISearchBar from "./AISearchBar";
 import InquiryModal from "./InquiryModal";
 import { CarFront, Map as MapIcon, Grid, Search, Database, Radio } from "lucide-react";
+import CustomSelect from "@/components/ui/CustomSelect";
 
 const INDIAN_STATES = [
   "Tamil Nadu", "Delhi", "Maharashtra", "Karnataka", "Gujarat", "Rajasthan",
@@ -27,6 +28,9 @@ const TYPE_LABELS: Record<string, string> = {
   spare_parts: "Spare Parts",
   car_repair: "Body Shop / Repair"
 };
+
+const STATE_OPTIONS = INDIAN_STATES.map(s => ({ value: s, label: s }));
+const TYPE_OPTIONS = SEARCH_TYPES.map(t => ({ value: t, label: TYPE_LABELS[t] }));
 
 export default function DealersPage() {
   const [dealers, setDealers] = useState<any[]>([]);
@@ -153,20 +157,18 @@ export default function DealersPage() {
             placeholder="City (e.g. Chennai, Coimbatore, Delhi, Mumbai...)"
             className="flex-1 bg-black border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-charcoal-600 focus:border-gold-500 focus:outline-none text-sm"
           />
-          <select
+          <CustomSelect
             value={selectedState}
-            onChange={e => setSelectedState(e.target.value)}
-            className="bg-black border border-white/10 rounded-lg px-4 py-3 text-white focus:border-gold-500 focus:outline-none text-sm min-w-[160px]"
-          >
-            {INDIAN_STATES.map(s => <option key={s} value={s}>{s}</option>)}
-          </select>
-          <select
+            onChange={setSelectedState}
+            options={STATE_OPTIONS}
+            className="min-w-[170px]"
+          />
+          <CustomSelect
             value={selectedType}
-            onChange={e => setSelectedType(e.target.value)}
-            className="bg-black border border-white/10 rounded-lg px-4 py-3 text-white focus:border-gold-500 focus:outline-none text-sm min-w-[160px]"
-          >
-            {SEARCH_TYPES.map(t => <option key={t} value={t}>{TYPE_LABELS[t]}</option>)}
-          </select>
+            onChange={setSelectedType}
+            options={TYPE_OPTIONS}
+            className="min-w-[180px]"
+          />
           <button
             onClick={() => fetchDealers(selectedCity, selectedState, selectedType)}
             disabled={loading}
