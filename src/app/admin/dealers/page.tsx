@@ -179,14 +179,14 @@ export default function AdminDashboard() {
                           </td>
                           <td className="p-4 flex gap-2">
                             <button 
-                              onClick={() => toggleDealerStatus(dealer.id, dealer.is_active, 'is_active')}
+                              onClick={() => toggleDealerStatus(dealer.id, dealer.is_active || false, 'is_active')}
                               className={`px-2 py-1 rounded text-xs font-bold flex items-center gap-1 ${dealer.is_active ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}
                             >
                               {dealer.is_active ? <CheckCircle size={12}/> : <XCircle size={12}/>} 
                               {dealer.is_active ? 'ACTIVE' : 'INACTIVE'}
                             </button>
                             <button 
-                              onClick={() => toggleDealerStatus(dealer.id, dealer.is_verified, 'is_verified')}
+                              onClick={() => toggleDealerStatus(dealer.id, dealer.is_verified || false, 'is_verified')}
                               className={`px-2 py-1 rounded text-xs font-bold flex items-center gap-1 ${dealer.is_verified ? 'bg-blue-500/20 text-blue-400' : 'bg-charcoal-800 text-charcoal-400'}`}
                             >
                               {dealer.is_verified ? 'VERIFIED' : 'UNVERIFIED'}
