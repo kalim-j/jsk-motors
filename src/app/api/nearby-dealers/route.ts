@@ -57,7 +57,8 @@ export async function GET(req: Request) {
       .map((el: any) => ({
         id: el.id.toString(),
         name: el.tags.name,
-        phone: el.tags.phone || el.tags["contact:phone"] || el.tags["phone:mobile"] || null,
+        phone: el.tags.phone || el.tags["contact:phone"] || el.tags["phone:mobile"] || el.tags["contact:mobile"] || el.tags["contact:whatsapp"] || null,
+        whatsapp: el.tags["contact:whatsapp"] || el.tags.phone || el.tags["contact:phone"] || null,
         website: el.tags.website || el.tags["contact:website"] || null,
         address: [
           el.tags["addr:housenumber"],
@@ -70,6 +71,10 @@ export async function GET(req: Request) {
         lat: el.lat || null,
         lon: el.lon || null,
         openingHours: el.tags["opening_hours"] || null,
+        facebook: el.tags["contact:facebook"] || null,
+        instagram: el.tags["contact:instagram"] || null,
+        brand: el.tags.brand || null,
+        description: el.tags.description || el.tags["description:en"] || null,
       }));
 
     return NextResponse.json({

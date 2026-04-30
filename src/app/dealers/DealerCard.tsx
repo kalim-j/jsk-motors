@@ -7,6 +7,8 @@ interface DealerCardProps {
   onContact: (dealer: Dealer) => void;
 }
 
+const cleanPhone = (phone: string) => phone.replace(/[\s\-\+]/g, "").replace(/^91/, "").replace(/^0/, "");
+
 export default function DealerCard({ dealer, onContact }: DealerCardProps) {
   return (
     <div className="bg-charcoal-950 border border-white/5 rounded-2xl overflow-hidden hover:border-gold-500/30 transition-all group flex flex-col h-full shadow-lg">
@@ -83,19 +85,21 @@ export default function DealerCard({ dealer, onContact }: DealerCardProps) {
 
         <div className="grid grid-cols-2 gap-2 pt-4 border-t border-white/5 mt-auto">
           {dealer.phone && (
-            <a
-              href={`tel:${dealer.phone}`}
-              className="flex items-center justify-center gap-2 py-2.5 rounded-lg bg-white/5 text-white hover:bg-white/10 transition-colors text-xs font-medium"
-            >
-              <Phone size={14} /> Call
-            </a>
+            <>
+              <a href={`tel:${dealer.phone}`} className="flex items-center justify-center gap-1 bg-gray-800 hover:bg-gray-700 text-white text-xs px-3 py-2.5 rounded-lg transition-colors">
+                📞 Call
+              </a>
+              <a href={`https://wa.me/91${cleanPhone(dealer.phone)}?text=Hi, I found your dealership on JSK CAR BODY SHOP. I am interested.`} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-1 bg-green-700 hover:bg-green-600 text-white text-xs px-3 py-2.5 rounded-lg transition-colors">
+                💬 WhatsApp
+              </a>
+            </>
           )}
-          <button
-            onClick={() => onContact(dealer)}
-            className={`flex items-center justify-center gap-2 py-2.5 rounded-lg btn-gold text-black hover:bg-gold-400 transition-colors text-xs font-bold ${!dealer.phone ? 'col-span-2' : ''}`}
-          >
-            Inquiry
-          </button>
+          <a href={dealer.latitude && dealer.longitude ? `https://www.google.com/maps?q=${dealer.latitude},${dealer.longitude}` : `https://www.google.com/maps/search/${encodeURIComponent(dealer.name + " " + dealer.city + " India")}`} target="_blank" rel="noopener noreferrer" className={`flex items-center justify-center gap-1 bg-blue-700 hover:bg-blue-600 text-white text-xs px-3 py-2.5 rounded-lg transition-colors ${!dealer.phone ? 'col-span-1' : ''}`}>
+            🗺️ Maps
+          </a>
+          <a href={`https://wa.me/?text=Join JSK CAR BODY SHOP dealer network free: https://jsk-car-body-shop.vercel.app/dealers/register`} target="_blank" rel="noopener noreferrer" className={`flex items-center justify-center gap-1 bg-yellow-500 hover:bg-yellow-400 text-black text-xs font-bold px-3 py-2.5 rounded-lg transition-colors ${!dealer.phone ? 'col-span-1' : ''}`}>
+            ➕ Invite
+          </a>
         </div>
       </div>
     </div>

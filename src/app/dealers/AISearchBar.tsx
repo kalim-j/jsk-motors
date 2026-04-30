@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Sparkles } from "lucide-react";
+import { Search, Sparkles, MapPin } from "lucide-react";
 import { Dealer } from "@/types/dealer";
 import DealerCard from "./DealerCard";
 
@@ -13,7 +13,12 @@ interface AISearchBarProps {
 export default function AISearchBar({ allDealers, onContact }: AISearchBarProps) {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState<{ dealer: Dealer; reason: string; score: number }[]>([]);
+  const [aiData, setAiData] = useState<{
+    results: Dealer[];
+    message: string;
+    suggestedCities: string[];
+    suggestedTypes: string[];
+  } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleSearch = async (e: React.FormEvent) => {
@@ -23,7 +28,7 @@ export default function AISearchBar({ allDealers, onContact }: AISearchBarProps)
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch("/api/ai/recommend", {
+      const response = await fetch("/api/ai-dealer-search", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query, dealers: allDealers }),
@@ -32,14 +37,7 @@ export default function AISearchBar({ allDealers, onContact }: AISearchBarProps)
       if (!response.ok) throw new Error("Failed to get AI recommendations");
       
       const data = await response.json();
-      
-      // Match dealer_ids from AI response back to the full Dealer objects
-      const matchedResults = data.recommendations.map((rec: any) => {
-        const dealer = allDealers.find(d => d.id === rec.dealer_id);
-        return dealer ? { dealer, reason: rec.reason, score: rec.confidence_score } : null;
-      }).filter(Boolean);
-
-      setResults(matchedResults);
+      setAiData(data);
     } catch (err) {
       console.error(err);
       setError("AI is currently unavailable. Please try our standard filters.");
@@ -95,27 +93,41 @@ export default function AISearchBar({ allDealers, onContact }: AISearchBarProps)
         </div>
       </div>
 
-      {results.length > 0 && (
+      {aiData && (
         <div className="animate-fade-up">
+          <div className="bg-gold-500/10 border border-gold-500/30 rounded-xl p-4 mb-6">
+            <p className="text-gold-400 font-medium flex items-start gap-2">
+              <Sparkles size={18} className="shrink-0 mt-0.5" />
+              {aiData.message}
+            </p>
+          </div>
+
+          {aiData.suggestedCities && aiData.suggestedCities.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-6">
+              <span className="text-sm text-charcoal-400 font-medium py-1">Suggested Locations:</span>
+              {aiData.suggestedCities.map((city, idx) => (
+                <button key={idx} onClick={() => setQuery(`dealers in ${city}`)} className="bg-gold-500/20 text-gold-400 hover:bg-gold-500/30 px-3 py-1 rounded-full text-xs font-bold transition-colors border border-gold-500/30 flex items-center gap-1">
+                  <MapPin size={12} /> {city}
+                </button>
+              ))}
+            </div>
+          )}
+
           <h4 className="text-lg font-bold text-gold-400 mb-4 flex items-center gap-2">
             <Sparkles size={16} /> Top AI Recommendations
           </h4>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {results.map((item, idx) => (
-              <div key={idx} className="relative group">
-                <div className="absolute -top-3 -right-3 z-20 bg-gold-500 text-black font-bold text-xs px-2 py-1 rounded-full border-2 border-charcoal-950 shadow-lg">
-                  {item.score}% Match
+          
+          {aiData.results && aiData.results.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {aiData.results.map((dealer, idx) => (
+                <div key={dealer.id || idx} className="h-full border-2 border-gold-500/30 rounded-2xl overflow-hidden">
+                  <DealerCard dealer={dealer} onContact={onContact} />
                 </div>
-                <div className="h-full border-2 border-gold-500/30 rounded-2xl overflow-hidden relative">
-                  <DealerCard dealer={item.dealer} onContact={onContact} />
-                  <div className="bg-charcoal-900 border-t border-gold-500/20 p-3 text-xs text-charcoal-300">
-                    <strong className="text-gold-400 block mb-1">AI Reason:</strong>
-                    {item.reason}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-charcoal-400 text-center py-8">No specific dealers matched your exact criteria, but you can browse the grid below or try a broader search.</p>
+          )}
         </div>
       )}
     </div>

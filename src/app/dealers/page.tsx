@@ -5,7 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { Dealer } from "@/types/dealer";
 import DealerCard from "./DealerCard";
 import FilterBar, { DealerFilters } from "./FilterBar";
-import DealerMap from "./DealerMap";
+import DealerMap from "@/components/dealers/DealerMap";
 import AISearchBar from "./AISearchBar";
 import InquiryModal from "./InquiryModal";
 import { CarFront, Users, Map as MapIcon, Grid } from "lucide-react";
@@ -148,7 +148,10 @@ export default function DealersPage() {
             </div>
           ) : (
             <div className="animate-fade-in">
-              <DealerMap dealers={filteredDealers} />
+              <div className="mb-4 text-charcoal-300 font-medium text-sm">
+                📍 Showing {filteredDealers.filter(d => d.latitude && d.longitude).length} dealers with location data on the map
+              </div>
+              <DealerMap dealers={filteredDealers as any} />
             </div>
           )
         ) : (
