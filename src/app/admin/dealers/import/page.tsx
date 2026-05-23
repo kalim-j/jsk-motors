@@ -139,7 +139,7 @@ export default function ImportDealersPage() {
             carTypes: ["All"],
             rating: 5,
             status: "active",
-            notes: \`Address: \${dealerData.address.replace(/\\|\\|/g, ", ")}\\nSource: \${dealerData.source}\`,
+            notes: `Address: ${dealerData.address.replace(/\|\|/g, ", ")}\nSource: ${dealerData.source}`,
             createdAt: serverTimestamp(),
             lastUpdated: serverTimestamp(),
             activityLog: [
@@ -156,7 +156,7 @@ export default function ImportDealersPage() {
         setProgress(Math.min(i + BATCH_SIZE, parsedDealers.length));
       }
 
-      toast.success(\`Successfully imported \${parsedDealers.length} dealers!\`);
+      toast.success(`Successfully imported ${parsedDealers.length} dealers!`);
       router.push("/admin/dealers");
     } catch (error: any) {
       console.error("Import error:", error);
@@ -203,7 +203,7 @@ export default function ImportDealersPage() {
                 {file ? file.name : "Click to select a file"}
               </span>
               <span className="text-sm text-muted-foreground mt-1">
-                {file ? \`\${(file.size / 1024).toFixed(1)} KB\` : "Supports .sql or .txt formats"}
+                {file ? `${(file.size / 1024).toFixed(1)} KB` : "Supports .sql or .txt formats"}
               </span>
             </label>
           </div>
@@ -217,7 +217,7 @@ export default function ImportDealersPage() {
               <div className="w-full bg-secondary rounded-full h-2 overflow-hidden">
                 <div 
                   className="bg-primary h-full transition-all duration-300"
-                  style={{ width: \`\${(progress / total) * 100}%\` }}
+                  style={{ width: `${(progress / total) * 100}%` }}
                 />
               </div>
             </div>
