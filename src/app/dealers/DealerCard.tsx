@@ -18,12 +18,25 @@ export default function DealerCard({ dealer, onContact }: DealerCardProps) {
       {/* Header / Photo area */}
       <div className="h-32 bg-charcoal-900 relative flex items-center justify-center">
         {(dealer.image_url || dealer.photo) ? (
-          <img src={dealer.image_url || dealer.photo} alt={dealer.name} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity absolute inset-0" />
-        ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-charcoal-800 to-black/60 flex items-center justify-center">
-            <span className="text-4xl opacity-20">🚗</span>
-          </div>
-        )}
+          <img 
+            src={dealer.image_url || dealer.photo} 
+            alt={dealer.name} 
+            onError={(e) => {
+              e.currentTarget.style.display = 'none';
+              if (e.currentTarget.nextElementSibling) {
+                (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'flex';
+              }
+            }}
+            className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity absolute inset-0" 
+          />
+        ) : null}
+        <div 
+          className="absolute inset-0 bg-gradient-to-br from-charcoal-800 to-black/60 items-center justify-center"
+          style={{ display: (dealer.image_url || dealer.photo) ? 'none' : 'flex' }}
+        >
+          <span className="text-4xl opacity-20">🚗</span>
+        </div>
+      </div>
 
         {/* Badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-1.5">
