@@ -72,14 +72,19 @@ export default function DealersPage() {
 
       // Client-side type filtering
       if (type !== "all" && filteredDealers.length > 0) {
-        const typeKeyword = type.replace("_", " ");
+        let typeKeyword = type.replace("_", " ");
+        // Special case for car_repair matching 'body shop/repair'
+        if (type === "car_repair") typeKeyword = "repair";
+        
         filteredDealers = filteredDealers.filter(d =>
-          d.dealer_type?.some?.((t: string) =>
+          d.category?.toLowerCase().includes(typeKeyword) ||
+          d.category?.toLowerCase().includes(type.replace("_", " ")) ||
+          (d.dealer_type && Array.isArray(d.dealer_type) && d.dealer_type.some((t: string) =>
             t.toLowerCase().includes(typeKeyword)
-          ) ||
-          d.specializations?.some?.((s: string) =>
+          )) ||
+          (d.specializations && Array.isArray(d.specializations) && d.specializations.some((s: string) =>
             s.toLowerCase().includes(typeKeyword)
-          ) ||
+          )) ||
           d.source?.toLowerCase().includes(typeKeyword)
         );
       }
