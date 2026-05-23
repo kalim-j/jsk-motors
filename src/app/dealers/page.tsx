@@ -1,7 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
+import { db } from "@/lib/firebase";
+import {
+  collection,
+  query,
+  where,
+  orderBy,
+  limit,
+  getDocs,
+} from "firebase/firestore";
 import DealerCard from "./DealerCard";
 import DealerMap from "@/components/dealers/DealerMap";
 import AISearchBar from "./AISearchBar";
@@ -48,46 +56,53 @@ export default function DealersPage() {
     setLoading(true);
     setIsLiveSearching(false);
     try {
-      // Step 1: Try Supabase first (fast, cached)
-      let query = supabase
-        .from('dealers')
-        .select('*')
-        .order('average_rating', { ascending: false, nullsFirst: false })
-        .limit(50);
+      // Query Firestore dealers collection
+      const constraints: any[] = [orderBy("createdAt", "desc"), limit(100)];
 
+      const q = query(collection(db, "dealers"), ...constraints);
+      const snapshot = await getDocs(q);
+      let firestoreDealers = snapshot.docs.map(d => ({ id: d.id, ...d.data() })) as any[];
+
+      // Client-side filtering
       if (city.trim()) {
-        query = query.ilike('city', `%${city.trim()}%`);
-      } else {
-        query = query.ilike('state', `%${state}%`);
+        firestoreDealers = firestoreDealers.filter(d =>
+          d.city?.toLowerCase().includes(city.trim().toLowerCase())
+        );
+      } else if (state) {
+        firestoreDealers = firestoreDealers.filter(d =>
+          d.state?.toLowerCase().includes(state.toLowerCase())
+        );
       }
 
-      if (type !== 'all') {
-        query = query.contains('dealer_type', [type]);
+      if (type !== "all") {
+        firestoreDealers = firestoreDealers.filter(d =>
+          d.specialization?.some((s: string) =>
+            s.toLowerCase().includes(type.replace("_", " "))
+          ) || d.carTypes?.includes(type)
+        );
       }
 
-      const { data: supabaseDealers } = await query;
-
-      if (supabaseDealers && supabaseDealers.length > 0) {
-        setDealers(supabaseDealers);
-        setDataSource('✅ Verified Database');
+      if (firestoreDealers.length > 0) {
+        setDealers(firestoreDealers);
+        setDataSource("✅ Verified Database");
         setLoading(false);
         return;
       }
 
-      // Step 2: No cached data → fall back to live OSM API
+      // No Firestore data → fall back to live OSM API
       setIsLiveSearching(true);
       const params = new URLSearchParams({ state, type });
-      if (city.trim()) params.set('city', city.trim());
+      if (city.trim()) params.set("city", city.trim());
 
       const res = await fetch(`/api/dealers/osm?${params.toString()}`);
       const data = await res.json();
 
       if (data.dealers && data.dealers.length > 0) {
         setDealers(data.dealers);
-        setDataSource('🗺️ Live from OpenStreetMap');
+        setDataSource("🗺️ Live from OpenStreetMap");
       } else {
         setDealers([]);
-        setDataSource('');
+        setDataSource("");
       }
     } catch (err) {
       console.error("Fetch error:", err);
@@ -98,7 +113,7 @@ export default function DealersPage() {
     }
   };
 
-  // Auto-load Tamil Nadu dealers on mount
+  // Auto-load all dealers on mount
   useEffect(() => {
     fetchDealers("", "Tamil Nadu", "all");
   }, []);
