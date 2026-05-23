@@ -17,8 +17,8 @@ export default function DealerCard({ dealer, onContact }: DealerCardProps) {
     <div className="bg-charcoal-950 border border-white/5 rounded-2xl overflow-hidden hover:border-gold-500/30 transition-all group flex flex-col h-full shadow-lg">
       {/* Header / Photo area */}
       <div className="h-32 bg-charcoal-900 relative flex items-center justify-center">
-        {dealer.photo ? (
-          <img src={dealer.photo} alt={dealer.name} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity absolute inset-0" />
+        {(dealer.image_url || dealer.photo) ? (
+          <img src={dealer.image_url || dealer.photo} alt={dealer.name} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity absolute inset-0" />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-charcoal-800 to-black/60 flex items-center justify-center">
             <span className="text-4xl opacity-20">🚗</span>
@@ -67,13 +67,19 @@ export default function DealerCard({ dealer, onContact }: DealerCardProps) {
         </div>
 
         {/* Type tags */}
-        {dealer.dealer_type && dealer.dealer_type.length > 0 && (
+        {(dealer.category || (dealer.dealer_type && dealer.dealer_type.length > 0)) && (
           <div className="flex flex-wrap gap-1 mb-3">
-            {dealer.dealer_type.map((t: string) => (
-              <span key={t} className="text-[10px] text-charcoal-400 bg-white/5 px-2 py-0.5 rounded border border-white/10 capitalize">
-                {t.replace('_', ' ')}
+            {dealer.category ? (
+              <span className="text-[10px] text-charcoal-400 bg-white/5 px-2 py-0.5 rounded border border-white/10 capitalize">
+                {dealer.category}
               </span>
-            ))}
+            ) : (
+              dealer.dealer_type.map((t: string) => (
+                <span key={t} className="text-[10px] text-charcoal-400 bg-white/5 px-2 py-0.5 rounded border border-white/10 capitalize">
+                  {t.replace('_', ' ')}
+                </span>
+              ))
+            )}
           </div>
         )}
 
@@ -94,8 +100,8 @@ export default function DealerCard({ dealer, onContact }: DealerCardProps) {
 
           {/* Row 2: WhatsApp + Maps */}
           <div className="flex gap-2">
-            {(dealer.whatsapp_url || dealer.whatsappLink) ? (
-              <a href={dealer.whatsapp_url || dealer.whatsappLink} target="_blank" rel="noopener noreferrer"
+            {(dealer.whatsapp || dealer.whatsapp_url || dealer.whatsappLink) ? (
+              <a href={dealer.whatsapp?.startsWith('http') ? dealer.whatsapp : `https://wa.me/91${(dealer.whatsapp || '').replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer"
                 className="flex-1 flex items-center justify-center gap-1 bg-green-700/80 hover:bg-green-600 border border-green-500/20 text-white text-xs py-2 rounded-lg transition-colors font-medium">
                 💬 WhatsApp
               </a>
