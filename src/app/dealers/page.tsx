@@ -52,7 +52,7 @@ export default function DealersPage() {
       let query = supabase
         .from("dealers")
         .select("*")
-        .limit(500);
+        .limit(2000);
 
       // Apply filters via Supabase query when possible
       if (city.trim()) {

@@ -132,7 +132,7 @@ export default function DealerCard({ dealer, onContact }: DealerCardProps) {
 
         {/* Source badge */}
         <div className="mt-3 text-[10px] text-charcoal-600 flex items-center gap-1">
-          {isOSM ? '🗺️ OpenStreetMap' : dealer.source === 'foursquare' ? '📍 Foursquare' : '✅ Verified'}
+          {isOSM ? '🗺️ OpenStreetMap' : dealer.source === 'foursquare' ? '📍 Foursquare' : dealer.source ? `🏢 ${dealer.source}` : '✅ Verified'}
         </div>
       </div>
     </div>
