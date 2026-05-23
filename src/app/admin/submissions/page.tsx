@@ -513,6 +513,24 @@ export default function AdminSubmissionsPage() {
                       </span>
                     </div>
                   )}
+                  {selected.aiScore && selected.aiScore.summary && (
+                    <div className="mt-2 pt-2 border-t border-gold-500/20">
+                      <span className="text-gold-400 block mb-1 font-bold">✨ AI Evaluation:</span>
+                      <div className="flex gap-4 mb-2">
+                        <div className="bg-gold-500/10 px-3 py-1 rounded-lg border border-gold-500/20">
+                          <span className="text-charcoal-400 text-xs mr-2">Price Score:</span>
+                          <span className="text-gold-400 font-bold">{selected.aiScore.priceScore}/10</span>
+                        </div>
+                        <div className="bg-gold-500/10 px-3 py-1 rounded-lg border border-gold-500/20">
+                          <span className="text-charcoal-400 text-xs mr-2">Condition:</span>
+                          <span className="text-gold-400 font-bold">{selected.aiScore.conditionScore}/10</span>
+                        </div>
+                      </div>
+                      <span className="text-white text-xs leading-relaxed italic">
+                        "{selected.aiScore.summary}"
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Car images in modal */}

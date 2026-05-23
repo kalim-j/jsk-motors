@@ -17,7 +17,7 @@ export async function POST(req: Request) {
 User is searching for: "${query}"
 
 Available dealers database:
-${JSON.stringify(dealers.slice(0, 20), null, 2)}
+${JSON.stringify(dealers.slice(0, 50), null, 2)}
 
 Return a JSON object:
 {

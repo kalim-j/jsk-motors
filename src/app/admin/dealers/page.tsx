@@ -15,6 +15,7 @@ import {
   Loader2,
   RefreshCw,
   Trash2,
+  Upload,
 } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -200,6 +201,13 @@ export default function AdminDealersPage() {
             >
               <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
             </button>
+            <Link
+              href="/admin/dealers/import"
+              className="flex items-center gap-2 px-5 py-2.5 bg-white/10 text-white font-bold rounded-xl hover:bg-white/20 transition-all text-sm border border-white/10"
+            >
+              <Upload size={16} />
+              Import SQL
+            </Link>
             <button
               onClick={() => setActiveTab("add")}
               className="flex items-center gap-2 px-5 py-2.5 bg-[#D4AF37] text-black font-bold rounded-xl hover:bg-yellow-500 transition-all text-sm"

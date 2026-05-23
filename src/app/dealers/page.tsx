@@ -52,7 +52,6 @@ export default function DealersPage() {
       let query = supabase
         .from('dealers')
         .select('*')
-        .eq('is_active', true)
         .order('average_rating', { ascending: false, nullsFirst: false })
         .limit(50);
 

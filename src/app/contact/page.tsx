@@ -12,6 +12,8 @@ import {
 import { useState } from "react";
 import toast from "react-hot-toast";
 import CustomSelect from "@/components/ui/CustomSelect";
+import { db } from "@/lib/firebase";
+import { collection, addDoc } from "firebase/firestore";
 
 const MAPS_EMBED =
   "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3893.0!2d78.279!3d12.518!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTLCsDMxJzA0LjgiTiA3OMKwMTYnNDQuNCJF!5e0!3m2!1sen!2sin!4v1681234567890!5m2!1sen!2sin";
@@ -34,18 +36,28 @@ export default function ContactPage() {
       return;
     }
     setSubmitting(true);
-    // Simulate form submission
-    await new Promise((r) => setTimeout(r, 1200));
-    setSubmitting(false);
-    toast.success("Appointment request sent! We'll call you shortly.");
-    setFormData({
-      name: "",
-      phone: "",
-      email: "",
-      service: "General Inquiry",
-      preferredDate: "",
-      message: "",
-    });
+    
+    try {
+      await addDoc(collection(db, "service_requests"), {
+        ...formData,
+        status: "pending",
+        createdAt: new Date()
+      });
+      toast.success("Appointment request sent! We'll call you shortly.");
+      setFormData({
+        name: "",
+        phone: "",
+        email: "",
+        service: "General Inquiry",
+        preferredDate: "",
+        message: "",
+      });
+    } catch (error) {
+      console.error("Error submitting request:", error);
+      toast.error("Failed to submit request.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (

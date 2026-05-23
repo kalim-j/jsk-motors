@@ -156,7 +156,19 @@ export default function SellPage() {
         return;
       }
 
-      console.log("Saving to Firestore...", { finalImages });
+      let aiScore = null;
+      try {
+        const scoreRes = await fetch("/api/ai-score", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+        if (scoreRes.ok) {
+          aiScore = await scoreRes.json();
+        }
+      } catch (err) {
+        console.error("AI Scoring failed silently:", err);
+      }
 
       await addDoc(collection(db, "car_submissions"), {
         userId: user.uid,
@@ -173,6 +185,7 @@ export default function SellPage() {
         phone: data.phone,
         images: finalImages,
         status: "pending",
+        aiScore: aiScore,
         createdAt: new Date()
       });
 

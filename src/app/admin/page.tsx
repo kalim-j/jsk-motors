@@ -24,8 +24,9 @@ const tabs = [
   { label: "Manage Cars", icon: "🚗", href: "/admin/cars" },
   { label: "Submissions", icon: "📋", href: "/admin/submissions" },
   { label: "Marketplace", icon: "🛒", href: "/admin/products" },
+  { label: "Services", icon: "🔧", href: "/admin/services" },
   { label: "Dealer Network", icon: "🤝", href: "/admin/dealers" },
-  { label: "Repair Showcase", icon: "🔧", href: "/admin/repairs" },
+  { label: "Repair Showcase", icon: "🔨", href: "/admin/repairs" },
   { label: "Orders", icon: "📦", href: "/admin/orders" },
   { label: "Analytics", icon: "📈", href: "/admin/analytics" },
 ];

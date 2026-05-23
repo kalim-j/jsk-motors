@@ -159,16 +159,6 @@ export default function Navbar() {
                         )}
                       </div>
                       <div className="p-1">
-                        {isAdmin && (
-                          <Link
-                            href="/admin"
-                            className="flex items-center gap-2 px-3 py-2 text-sm text-white hover:bg-gold-500/10 rounded-lg transition-colors"
-                            onClick={() => setUserMenuOpen(false)}
-                          >
-                            <Settings size={14} className="text-gold-500" />
-                            Admin Panel
-                          </Link>
-                        )}
                         <Link
                           href="/dashboard"
                           className="flex items-center gap-2 px-3 py-2 text-sm text-white hover:bg-white/5 rounded-lg transition-colors"
@@ -177,16 +167,6 @@ export default function Navbar() {
                           <User size={14} className="text-charcoal-400" />
                           User Dashboard
                         </Link>
-                        {isAdmin && (
-                          <Link
-                            href="/admin/analytics"
-                            className="flex items-center gap-2 px-3 py-2 text-sm text-white hover:bg-white/5 rounded-lg transition-colors"
-                            onClick={() => setUserMenuOpen(false)}
-                          >
-                            <TrendingUp size={14} className="text-gold-500" />
-                            Admin Analytics
-                          </Link>
-                        )}
                         <button
                           onClick={() => {
                             handleLogout();
