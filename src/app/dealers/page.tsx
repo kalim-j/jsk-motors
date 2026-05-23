@@ -44,6 +44,9 @@ export default function DealersPage() {
   const [selectedState, setSelectedState] = useState("");
   const [selectedType, setSelectedType] = useState("all");
 
+  const [allLocations, setAllLocations] = useState<{city: string, state: string}[]>([]);
+  const [availableCities, setAvailableCities] = useState<{value: string, label: string}[]>([{ value: "", label: "All Districts / Cities" }]);
+
   const fetchDealers = async (city: string, state: string, type: string) => {
     setLoading(true);
     setIsLiveSearching(false);
@@ -120,10 +123,37 @@ export default function DealersPage() {
     }
   };
 
-  // Auto-load all dealers on mount (no state filter so all imported data shows)
+  // Auto-load all dealers and unique locations on mount
   useEffect(() => {
-    fetchDealers("", "", "all");
+    async function init() {
+      // Fetch just city and state for the dropdowns
+      const { data } = await supabase.from("dealers").select("city, state").limit(5000);
+      if (data) {
+        setAllLocations(data as {city: string, state: string}[]);
+      }
+      fetchDealers("", "", "all");
+    }
+    init();
   }, []);
+
+  // Update available districts when state changes
+  useEffect(() => {
+    let filtered = allLocations;
+    if (selectedState) {
+      filtered = filtered.filter(l => l.state?.toLowerCase() === selectedState.toLowerCase());
+    }
+    const uniqueCities = Array.from(new Set(filtered.map(l => l.city?.trim()).filter(Boolean))).sort();
+    
+    setAvailableCities([
+      { value: "", label: "All Districts / Cities" },
+      ...uniqueCities.map(c => ({ value: c, label: c }))
+    ]);
+
+    // If currently selected city is no longer valid, reset it
+    if (selectedCity && selectedState && !uniqueCities.includes(selectedCity)) {
+      setSelectedCity("");
+    }
+  }, [allLocations, selectedState, selectedCity]);
 
   const handleContact = (dealer: any) => {
     setSelectedDealer(dealer);
@@ -168,12 +198,12 @@ export default function DealersPage() {
       <div className="container-custom">
         {/* Location Search */}
         <div className="flex flex-col md:flex-row gap-3 p-4 bg-charcoal-950 rounded-xl border border-white/10 mb-8">
-          <input
+          <CustomSelect
             value={selectedCity}
-            onChange={e => setSelectedCity(e.target.value)}
-            onKeyDown={e => e.key === "Enter" && fetchDealers(selectedCity, selectedState, selectedType)}
-            placeholder="City (e.g. Chennai, Coimbatore, Delhi, Mumbai...)"
-            className="flex-1 bg-black border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-charcoal-600 focus:border-gold-500 focus:outline-none text-sm"
+            onChange={setSelectedCity}
+            options={availableCities}
+            placeholder="Select District / City"
+            className="flex-1 min-w-[200px]"
           />
           <CustomSelect
             value={selectedState}
