@@ -36,7 +36,6 @@ export default function DealerCard({ dealer, onContact }: DealerCardProps) {
         >
           <span className="text-4xl opacity-20">🚗</span>
         </div>
-      </div>
 
         {/* Badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-1.5">
