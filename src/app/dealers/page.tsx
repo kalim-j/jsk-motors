@@ -1,15 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { db } from "@/lib/firebase";
-import {
-  collection,
-  query,
-  where,
-  orderBy,
-  limit,
-  getDocs,
-} from "firebase/firestore";
+import { supabase } from "@/lib/supabase";
 import DealerCard from "./DealerCard";
 import DealerMap from "@/components/dealers/DealerMap";
 import AISearchBar from "./AISearchBar";
@@ -37,7 +29,7 @@ const TYPE_LABELS: Record<string, string> = {
   car_repair: "Body Shop / Repair"
 };
 
-const STATE_OPTIONS = INDIAN_STATES.map(s => ({ value: s, label: s }));
+const STATE_OPTIONS = [{ value: "", label: "All States" }, ...INDIAN_STATES.map(s => ({ value: s, label: s }))];
 const TYPE_OPTIONS = SEARCH_TYPES.map(t => ({ value: t, label: TYPE_LABELS[t] }));
 
 export default function DealersPage() {
@@ -49,47 +41,57 @@ export default function DealersPage() {
   const [isLiveSearching, setIsLiveSearching] = useState(false);
 
   const [selectedCity, setSelectedCity] = useState("");
-  const [selectedState, setSelectedState] = useState("Tamil Nadu");
+  const [selectedState, setSelectedState] = useState("");
   const [selectedType, setSelectedType] = useState("all");
 
   const fetchDealers = async (city: string, state: string, type: string) => {
     setLoading(true);
     setIsLiveSearching(false);
     try {
-      // Query Firestore dealers collection
-      const constraints: any[] = [orderBy("createdAt", "desc"), limit(100)];
+      // Step 1: Query Supabase dealers table
+      let query = supabase
+        .from("dealers")
+        .select("*")
+        .limit(500);
 
-      const q = query(collection(db, "dealers"), ...constraints);
-      const snapshot = await getDocs(q);
-      let firestoreDealers = snapshot.docs.map(d => ({ id: d.id, ...d.data() })) as any[];
-
-      // Client-side filtering
+      // Apply filters via Supabase query when possible
       if (city.trim()) {
-        firestoreDealers = firestoreDealers.filter(d =>
-          d.city?.toLowerCase().includes(city.trim().toLowerCase())
-        );
+        query = query.ilike("city", `%${city.trim()}%`);
       } else if (state) {
-        firestoreDealers = firestoreDealers.filter(d =>
-          d.state?.toLowerCase().includes(state.toLowerCase())
+        query = query.ilike("state", `%${state}%`);
+      }
+
+      const { data: supabaseDealers, error } = await query;
+
+      if (error) {
+        console.error("Supabase query error:", error.message, error.details);
+        // If the table doesn't exist or RLS blocks, log and fall through to OSM
+      }
+
+      let filteredDealers = supabaseDealers || [];
+
+      // Client-side type filtering
+      if (type !== "all" && filteredDealers.length > 0) {
+        const typeKeyword = type.replace("_", " ");
+        filteredDealers = filteredDealers.filter(d =>
+          d.dealer_type?.some?.((t: string) =>
+            t.toLowerCase().includes(typeKeyword)
+          ) ||
+          d.specializations?.some?.((s: string) =>
+            s.toLowerCase().includes(typeKeyword)
+          ) ||
+          d.source?.toLowerCase().includes(typeKeyword)
         );
       }
 
-      if (type !== "all") {
-        firestoreDealers = firestoreDealers.filter(d =>
-          d.specialization?.some((s: string) =>
-            s.toLowerCase().includes(type.replace("_", " "))
-          ) || d.carTypes?.includes(type)
-        );
-      }
-
-      if (firestoreDealers.length > 0) {
-        setDealers(firestoreDealers);
+      if (filteredDealers.length > 0) {
+        setDealers(filteredDealers);
         setDataSource("✅ Verified Database");
         setLoading(false);
         return;
       }
 
-      // No Firestore data → fall back to live OSM API
+      // Step 2: No Supabase data → fall back to live OSM API
       setIsLiveSearching(true);
       const params = new URLSearchParams({ state, type });
       if (city.trim()) params.set("city", city.trim());
@@ -113,9 +115,9 @@ export default function DealersPage() {
     }
   };
 
-  // Auto-load all dealers on mount
+  // Auto-load all dealers on mount (no state filter so all imported data shows)
   useEffect(() => {
-    fetchDealers("", "Tamil Nadu", "all");
+    fetchDealers("", "", "all");
   }, []);
 
   const handleContact = (dealer: any) => {
@@ -232,10 +234,10 @@ export default function DealersPage() {
             <h3 className="text-xl font-bold text-white mb-2">No Dealers Found</h3>
             <p className="text-charcoal-400 mb-4">Try searching a different city or change the type filter</p>
             <button
-              onClick={() => fetchDealers("", "Tamil Nadu", "all")}
+              onClick={() => fetchDealers("", "", "all")}
               className="btn-gold px-6 py-2 rounded-lg font-bold"
             >
-              Show Tamil Nadu Dealers
+              Show All Dealers
             </button>
           </div>
         ) : viewMode === "grid" ? (
