@@ -90,7 +90,11 @@ function smartSearch(query: string, dealers: DealerInput[]) {
       state: (dealer.state || "").toLowerCase(),
       address: (dealer.address || "").toLowerCase(),
       source: (dealer.source || "").toLowerCase(),
-      types: (dealer.dealer_type || dealer.specializations || []).map((t: string) => t.toLowerCase()),
+      types: [
+        dealer.category,
+        ...(dealer.dealer_type || []),
+        ...(dealer.specializations || [])
+      ].filter(Boolean).map((t: string) => String(t).toLowerCase()),
       email: (dealer.email || "").toLowerCase(),
     };
 
