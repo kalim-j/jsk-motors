@@ -161,9 +161,6 @@ export default function DealersPage() {
       </div>
 
       <div className="container-custom">
-        {/* AI Search Bar */}
-        <AISearchBar allDealers={dealers} onContact={handleContact} />
-
         {/* Location Search */}
         <div className="flex flex-col md:flex-row gap-3 p-4 bg-charcoal-950 rounded-xl border border-white/10 mb-8">
           <input

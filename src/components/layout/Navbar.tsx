@@ -15,8 +15,8 @@ const NAVIGATION_LINKS = [
   { href: "/buy", label: "Buy Cars" },
   { href: "/sell", label: "Sell Your Car" },
   { href: "/shop", label: "Marketplace" },
-  { href: "/services", label: "Services" },
   { href: "/dealers", label: "Dealer Network" },
+  { href: "/ai-search", label: "AI Search ✨" },
   { href: "/contact", label: "Contact" },
 ];
 
